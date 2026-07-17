@@ -17,11 +17,13 @@ inits the Networker
 ]]
 function Networker.init()
 	if RunService:IsServer() then
-		if folder ==  nil then 
+		if folder == nil then
 			folder = Instance.new("Folder")
 			folder.Parent = game:GetService("ReplicatedStorage")
 			folder.Name = "Remotes"
-		elseif RunService:IsClient() then
+		end
+	elseif RunService:IsClient() then
+		if folder == nil then
 			folder = game:GetService("ReplicatedStorage"):WaitForChild("Remotes")
 		end
 	end
