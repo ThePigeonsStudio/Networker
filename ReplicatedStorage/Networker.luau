@@ -73,8 +73,10 @@ end
 --[[
 looks for a remote event, errors if not found
 ]]
-function Networker.get(name: string): Networker
-	assert(folder, "Call Networker.init() before using Networker.get().")
+function Networker.getRemote(name: string): Networker
+	if folder == nil then
+		error("You must call Networker.init() before using Networker.newRemote()!")
+	end
 
 	local remote = folder:FindFirstChild(name)
 	assert(remote, `Remote "{name}" does not exist.`)
