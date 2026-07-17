@@ -2,7 +2,14 @@
 
 A lightweight, type-safe networking library for Roblox built with **Strict Luau**.
 
-Networker provides a clean wrapper around Roblox `RemoteEvent`s, making it easier to create, retrieve, fire, and listen to networking events while keeping your code simple and organized.
+<p align="center">
+  <a href="#features">Features</a> •
+  <a href="#installation">Installation</a> •
+  <a href="#quick-start">Quick Start</a> •
+  <a href="#api">API</a> •
+  <a href="./CHANGELOG.md">Changelog</a> •
+  <a href="./LICENSE">License</a>
+</p>
 
 ---
 
@@ -15,6 +22,7 @@ Networker provides a clean wrapper around Roblox `RemoteEvent`s, making it easie
 - 📨 Fire events between the client and server
 - 🔗 Built-in event connection helpers
 - 🛡️ Runtime validation with helpful error messages
+- 📦 Wally package support
 
 ---
 
@@ -27,7 +35,7 @@ Install using Wally:
 Networker = "thepigeonsstudio/networker@1.2.0"
 ```
 
-Then run:
+Then install your dependencies:
 
 ```bash
 wally install
@@ -44,107 +52,12 @@ local Networker = require(Packages.Networker)
 
 Networker.init()
 
-local Message = Networker.newRemote("Message")
-
-Message:OnServerEvent(function(player, text)
-	print(player.Name, text)
-end)
-```
-
-### Client
-
-```lua
-local Networker = require(Packages.Networker)
-
-Networker.init()
-
-local Message = Networker.getRemote("Message")
-
-Message:FireServer("Hello Server!")
-
-Message:OnClientEvent(function(text)
-	print(text)
-end)
-```
-
----
-
-# API
-
-## `Networker.init()`
-
-Initializes Networker.
-
-- Creates the `Remotes` folder on the server.
-- Waits for the `Remotes` folder on the client.
-
----
-
-## `Networker.newRemote(name)`
-
-Creates a new `RemoteEvent`.
-
-Returns a `Networker` object.
-
----
-
-## `Networker.getRemote(name)`
-
-Gets an existing remote.
-
-Returns a `Networker` object.
-
----
-
-## `:FireServer(...)`
-
-Fires the remote from the client to the server.
-
----
-
-## `:FireClient(player, ...)`
-
-Fires the remote from the server to a specific client.
-
----
-
-## `:FireAllClients(...)`
-
-Fires the remote from the server to every connected client.
-
----
-
-## `:OnServerEvent(callback)`
-
-Connects a callback to the server event.
-
-Returns an `RBXScriptConnection`.
-
----
-
-## `:OnClientEvent(callback)`
-
-Connects a callback to the client event.
-
-Returns an `RBXScriptConnection`.
-
----
-
-# Example
-
-### Server
-
-```lua
-local Networker = require(Packages.Networker)
-
-Networker.init()
-
 local Chat = Networker.newRemote("Chat")
 
 Chat:OnServerEvent(function(player, message)
 	print(player.Name, message)
 
-	Chat:FireClient(player, "Received!")
+	Chat:FireClient(player, "Message received!")
 end)
 ```
 
@@ -166,9 +79,108 @@ end)
 
 ---
 
-# License
+# API
 
-Licensed under the MIT License.
+## `Networker.init()`
+
+Initializes Networker.
+
+- **Server:** Creates the `Remotes` folder inside `ReplicatedStorage`.
+- **Client:** Waits for the `Remotes` folder to replicate.
+
+---
+
+## `Networker.newRemote(name)`
+
+Creates a new `RemoteEvent`.
+
+Returns a `Networker` object.
+
+---
+
+## `Networker.getRemote(name)`
+
+Retrieves an existing remote.
+
+Returns a `Networker` object.
+
+---
+
+## `:FireServer(...)`
+
+Fires the remote from the **client** to the **server**.
+
+---
+
+## `:FireClient(player, ...)`
+
+Fires the remote from the **server** to a specific player.
+
+---
+
+## `:FireAllClients(...)`
+
+Fires the remote from the **server** to every connected player.
+
+---
+
+## `:OnServerEvent(callback)`
+
+Connects a callback to `RemoteEvent.OnServerEvent`.
+
+Returns an `RBXScriptConnection`.
+
+---
+
+## `:OnClientEvent(callback)`
+
+Connects a callback to `RemoteEvent.OnClientEvent`.
+
+Returns an `RBXScriptConnection`.
+
+---
+
+## Example
+
+### Server
+
+```lua
+local Networker = require(Packages.Networker)
+
+Networker.init()
+
+local Damage = Networker.newRemote("Damage")
+
+Damage:OnServerEvent(function(player, amount)
+	print(player.Name, "dealt", amount, "damage")
+end)
+```
+
+### Client
+
+```lua
+local Networker = require(Packages.Networker)
+
+Networker.init()
+
+local Damage = Networker.getRemote("Damage")
+
+Damage:FireServer(25)
+```
+
+---
+
+## Contributing
+
+Contributions, bug reports, feature requests, and pull requests are welcome!
+
+If you encounter an issue or have an idea for improving Networker, feel free to open an issue or submit a pull request.
+
+---
+
+## License
+
+This project is licensed under the **MIT License**.
 
 ---
 
