@@ -1,5 +1,7 @@
 # Networker
 
+[📖 Documentation](README.md) • [📝 Changelog](CHANGELOG.md) • [📄 License](LICENSE)
+
 A lightweight, type-safe networking library for Roblox built with **Strict Luau**.
 
 Networker simplifies working with `RemoteEvent`s by providing a clean, object-oriented API while remaining lightweight and easy to understand.
