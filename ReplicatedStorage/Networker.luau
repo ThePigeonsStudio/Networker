@@ -70,15 +70,17 @@ end
 looks for a remote event, errors if not found
 ]]
 function Networker.get(name: string): Networker
-assert(folder, "Call Networker.init() before using Networker.get().")
+	assert(folder, "Call Networker.init() before using Networker.get().")
 
-local remote = folder:FindFirstChild(name)
-assert(remote, `Remote "{name}" does not exist.`)
+	local remote = folder:FindFirstChild(name)
+	assert(remote, `Remote "{name}" does not exist.`)
 
-return setmetatable({
-	name = name,
-	Remote = remote :: RemoteEvent,
-}, Networker)
+	local obj = setmetatable({
+		name = name,
+		Remote = remote :: RemoteEvent,
+	}, Networker)
+
+	return (obj :: Networker)
 end
 
 return Networker :: Networker
