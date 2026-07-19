@@ -119,9 +119,9 @@ function Networker.newUnreliableRemoteEvent(name : string) : Networker
 	assert(RunService:IsServer(), "cannot construct remotes on the client!")
 
 	local self = setmetatable({}, Networker)
-	self.UnreliableRemoteEvent = Instance.new("RemoteEvent")
-	self.UnreliableRemoteEvent.Name = name
-	self.UnreliableRemoteEvent.Parent = folder
+	self.Remote = Instance.new("UnreliableRemoteEvent")
+	self.Remote.Name = name
+	self.Remote.Parent = folder
 	self.name = name
 	return self
 end
