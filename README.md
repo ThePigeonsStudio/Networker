@@ -24,7 +24,7 @@ Install using Wally:
 
 ```toml
 [dependencies]
-Networker = "thepigeonsstudio/networker@1.2.0"
+Networker = "thepigeonsstudio/networker@1.3.1"
 ```
 
 Then run:
