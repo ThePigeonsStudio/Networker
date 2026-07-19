@@ -7,6 +7,7 @@ Networker.__index = Networker
 export type Networker = typeof(Networker) & {
 	name : string,
 	Remote : RemoteEvent,
+	unreliableRemote : UnreliableRemoteEvent,
 }
 
 local folder : Folder
@@ -49,11 +50,34 @@ function Networker.newRemote(name : string) : Networker
 end
 
 --[[
+constructs a new UnreliableRemoteEvent
+--]]
+function Networker.newUnreliableRemoteEvent(name : string) : Networker
+	if folder == nil then
+		error("You must call Networker.init() before using Networker.newUnreliableRemoteEvent()!")
+	end
+
+	assert(not folder:FindFirstChild(name), `Remote "{name}" already exists.`)
+	assert(RunService:IsServer(), "cannot construct remotes on the client!")
+
+	local self = setmetatable({}, Networker)
+	self.UnreliableRemote = Instance.new("UnreliableRemoteEvent")
+	self.UnreliableRemote.Name = name
+	self.UnreliableRemote.Parent = folder
+	self.name = name
+	return self
+end
+
+--[[
 fires the remote on the server
 ]]
 function Networker:FireServer(...)
 	assert(RunService:IsClient(), "cannot fire server on the server!")
-	self.Remote:FireServer(...)
+	if self.Remote then
+		self.Remote:FireServer(...)
+		elseif self.UnreliableRemote then
+		self.UnreliableRemote:FireServer(...)
+	end
 end
 
 --[[
@@ -61,7 +85,11 @@ fires the remote on the client
 ]]
 function Networker:FireClient(player : Player, ...)	
 	assert(RunService:IsServer(), "cannot fire client on the server!")
-	self.Remote:FireClient(player, ...)
+	if self.Remote then
+		self.Remote:FireClient(player, ...)
+		elseif self.UnreliableRemote then
+		self.UnreliableRemote:FireClient(player, ...)
+	end
 end 
 
 --[[
@@ -69,7 +97,11 @@ fires the remote on all clients
 ]]
 function Networker:FireAllClients(...)
 	assert(RunService:IsServer(), "cannot fire all clients on the server!")
-	self.Remote:FireAllClients(...)
+	if self.Remote then
+		self.Remote:FireAllClients(...)
+		elseif self.UnreliableRemote then
+		self.UnreliableRemote:FireAllClients(...)
+	end
 end
 
 --[[
@@ -92,6 +124,25 @@ function Networker.getRemote(name: string): Networker
 end
 
 --[[
+looks for a UnreliableRemoteEvent, errors if not found
+]]
+function Networker.getUnreliableRemote(name: string): Networker
+	if folder == nil then
+		error("You must call Networker.init() before using Networker.newUnreliableRemoteEvent()!")
+	end
+
+	local remote = folder:FindFirstChild(name)
+	assert(remote, `Remote "{name}" does not exist.`)
+
+	local obj = setmetatable({
+		name = name,
+		UnreliableRemote = unreliableRemote :: UnreliableRemoteEvent,
+	}, Networker)
+
+	return (obj :: Networker)
+end
+
+--[[
 Connects a callback to the server event
 ]]
 function Networker:OnServerEvent(callback: (Player, ...any) -> ()): RBXScriptConnection
@@ -105,25 +156,6 @@ Connects a callback to the client event
 function Networker:OnClientEvent(callback: (...any) -> ()): RBXScriptConnection
 	assert(RunService:IsClient(), "OnClientEvent can only be called from the client.")
 	return self.Remote.OnClientEvent:Connect(callback)
-end
-
---[[
-constructs a new UnreliableRemoteEvent
---]]
-function Networker.newUnreliableRemoteEvent(name : string) : Networker
-	if folder == nil then
-		error("You must call Networker.init() before using Networker.newUnreliableRemoteEvent()!")
-	end
-
-	assert(not folder:FindFirstChild(name), `Remote "{name}" already exists.`)
-	assert(RunService:IsServer(), "cannot construct remotes on the client!")
-
-	local self = setmetatable({}, Networker)
-	self.Remote = Instance.new("UnreliableRemoteEvent")
-	self.Remote.Name = name
-	self.Remote.Parent = folder
-	self.name = name
-	return self
 end
 
 return Networker :: Networker
