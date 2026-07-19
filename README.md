@@ -2,13 +2,12 @@
 
 A lightweight, type-safe networking library for Roblox built with **Strict Luau**.
 
-Networker provides a clean, object-oriented wrapper around Roblox's `RemoteEvent` and `UnreliableRemoteEvent`, making networking simple, organized, and type-safe.
+Networker provides a clean, object-oriented wrapper around Roblox's `RemoteEvent` and `UnreliableRemoteEvent`, making networking simple, organized, and easy to use.
 
 <p align="center">
   <a href="#features">Features</a> •
   <a href="#installation">Installation</a> •
-  <a href="#quick-start">Quick Start</a> •
-  <a href="#unreliable-remote-events">Unreliable Remote Events</a> •
+  <a href="#remotes">Remotes</a> •
   <a href="#api">API</a> •
   <a href="./CHANGELOG.md">Changelog</a> •
   <a href="./LICENSE">License</a>
@@ -18,7 +17,7 @@ Networker provides a clean, object-oriented wrapper around Roblox's `RemoteEvent
 
 # Features
 
-- 🚀 Lightweight
+- 🚀 Lightweight and easy to use
 - 🔒 Written in `--!strict`
 - 📡 Supports `RemoteEvent`
 - ⚡ Supports `UnreliableRemoteEvent`
@@ -32,14 +31,14 @@ Networker provides a clean, object-oriented wrapper around Roblox's `RemoteEvent
 
 # Installation
 
-Install with Wally:
+Install using Wally:
 
 ```toml
 [dependencies]
 Networker = "thepigeonsstudio/networker@1.3.1"
 ```
 
-Then run:
+Then install your dependencies:
 
 ```bash
 wally install
@@ -47,9 +46,15 @@ wally install
 
 ---
 
-# Quick Start
+# Remotes
 
-## Server
+Networker supports both **RemoteEvent** and **UnreliableRemoteEvent** with the same simple API.
+
+## RemoteEvent
+
+### Creating a Remote
+
+**Server**
 
 ```lua
 local Networker = require(Packages.Networker)
@@ -57,15 +62,11 @@ local Networker = require(Packages.Networker)
 Networker.init()
 
 local Chat = Networker.newRemote("Chat")
-
-Chat:OnServerEvent(function(player, message)
-	print(player.Name, message)
-
-	Chat:FireClient(player, "Received!")
-end)
 ```
 
-## Client
+### Getting a Remote
+
+**Client**
 
 ```lua
 local Networker = require(Packages.Networker)
@@ -73,9 +74,34 @@ local Networker = require(Packages.Networker)
 Networker.init()
 
 local Chat = Networker.getRemote("Chat")
+```
 
-Chat:FireServer("Hello!")
+### Sending Events
 
+```lua
+-- Client → Server
+Chat:FireServer("Hello Server!")
+
+-- Server → Client
+Chat:FireClient(player, "Hello Client!")
+
+-- Server → All Clients
+Chat:FireAllClients("Welcome!")
+```
+
+### Listening for Events
+
+**Server**
+
+```lua
+Chat:OnServerEvent(function(player, message)
+	print(player.Name, message)
+end)
+```
+
+**Client**
+
+```lua
 Chat:OnClientEvent(function(message)
 	print(message)
 end)
@@ -83,43 +109,59 @@ end)
 
 ---
 
-# Unreliable Remote Events
+## UnreliableRemoteEvent
 
-Networker fully supports Roblox's `UnreliableRemoteEvent`.
+`UnreliableRemoteEvent` is designed for high-frequency data where occasional packet loss is acceptable.
 
-These are ideal for high-frequency data where occasional packet loss is acceptable, such as:
+Examples include:
 
-- Character positions
-- Camera movement
+- Character movement
+- Camera updates
 - Aim direction
 - Visual effects
 - Cosmetic updates
 
-## Creating one
+### Creating an Unreliable Remote
+
+**Server**
 
 ```lua
 local Position = Networker.newUnreliableRemoteEvent("Position")
 ```
 
-## Getting one
+### Getting an Unreliable Remote
+
+**Client**
 
 ```lua
 local Position = Networker.getUnreliableRemote("Position")
 ```
 
-The API is identical to `RemoteEvent`.
+### Sending Events
 
 ```lua
 Position:FireServer(...)
+
 Position:FireClient(player, ...)
+
 Position:FireAllClients(...)
+```
 
+### Listening for Events
+
+**Server**
+
+```lua
 Position:OnServerEvent(function(player, ...)
-	-- Handle event
+	print(player)
 end)
+```
 
+**Client**
+
+```lua
 Position:OnClientEvent(function(...)
-	-- Handle event
+	print(...)
 end)
 ```
 
@@ -130,27 +172,29 @@ end)
 | Function | Description |
 |----------|-------------|
 | `Networker.init()` | Initializes Networker. |
-| `Networker.newRemote(name)` | Creates a `RemoteEvent`. |
+| `Networker.newRemote(name)` | Creates a new `RemoteEvent`. |
 | `Networker.getRemote(name)` | Gets an existing `RemoteEvent`. |
-| `Networker.newUnreliableRemoteEvent(name)` | Creates an `UnreliableRemoteEvent`. |
+| `Networker.newUnreliableRemoteEvent(name)` | Creates a new `UnreliableRemoteEvent`. |
 | `Networker.getUnreliableRemote(name)` | Gets an existing `UnreliableRemoteEvent`. |
-| `:FireServer(...)` | Fires to the server. |
-| `:FireClient(player, ...)` | Fires to one client. |
-| `:FireAllClients(...)` | Fires to every client. |
-| `:OnServerEvent(callback)` | Connects to `OnServerEvent`. |
-| `:OnClientEvent(callback)` | Connects to `OnClientEvent`. |
+| `:FireServer(...)` | Fires an event to the server. |
+| `:FireClient(player, ...)` | Fires an event to a specific client. |
+| `:FireAllClients(...)` | Fires an event to every client. |
+| `:OnServerEvent(callback)` | Connects a callback to `OnServerEvent`. |
+| `:OnClientEvent(callback)` | Connects a callback to `OnClientEvent`. |
 
 ---
 
 # Contributing
 
-Contributions, feature requests, bug reports, and pull requests are welcome!
+Contributions, bug reports, feature requests, and pull requests are welcome!
+
+If you discover a bug or have an idea for improving Networker, feel free to open an issue or submit a pull request.
 
 ---
 
 # License
 
-Licensed under the MIT License.
+This project is licensed under the **MIT License**.
 
 ---
 
