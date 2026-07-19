@@ -1,82 +1,175 @@
-# Changelog
+# Networker
 
-All notable changes to **Networker** will be documented in this file.
+A lightweight, type-safe networking library for Roblox built with **Strict Luau**.
 
-This project follows [Semantic Versioning](https://semver.org/).
-
----
-
-## [1.3.1] - 2026-07-19
-
-### Fixed
-
-- Fixed type definitions for `UnreliableRemoteEvent`.
-- Fixed `getUnreliableRemote()` referencing an incorrect variable.
-- Fixed `OnServerEvent()` support for `UnreliableRemoteEvent`.
-- Fixed `OnClientEvent()` support for `UnreliableRemoteEvent`.
-- Improved error handling when an invalid remote is accessed.
-- General stability and reliability improvements.
+Networker provides a clean wrapper around Roblox `RemoteEvent`s, making it easier to create, retrieve, fire, and listen to networking events while keeping your code simple and organized.
 
 ---
 
-## [1.3.0] - 2026-07-19
+## Features
 
-### Added
-
-- Added support for `UnreliableRemoteEvent`.
-- Added `Networker.newUnreliableRemoteEvent()`.
-- Added `Networker.getUnreliableRemote()`.
-- Extended the networking API to support both `RemoteEvent` and `UnreliableRemoteEvent`.
-
-### Changed
-
-- Refactored internal networking logic to support multiple remote types.
+- 🚀 Lightweight and easy to use
+- 🔒 Written in `--!strict`
+- 📡 Simple `RemoteEvent` wrapper
+- 🔄 Client and server support
+- 📨 Fire events between the client and server
+- 🔗 Built-in event connection helpers
+- 🛡️ Runtime validation with helpful error messages
 
 ---
 
-## [1.2.0] - 2026-07-19
+## Installation
 
-### Added
+Install using Wally:
 
-- Added automatic client initialization using `WaitForChild()` for the `Remotes` folder.
-- Improved documentation and usage examples.
+```toml
+[dependencies]
+Networker = "thepigeonsstudio/networker@1.2.0"
+```
 
-### Changed
+Then run:
 
-- Renamed `Networker.get()` to `Networker.getRemote()` for API consistency.
-- Improved `Networker.init()` to correctly initialize on both the server and client.
-
-### Fixed
-
-- Fixed initialization issues when clients accessed remotes before replication.
-- Fixed multiple stability issues discovered after the initial release.
+```bash
+wally install
+```
 
 ---
 
-## [1.1.0] - 2026-07-19
+## Quick Start
 
-### Added
+### Server
 
-- Added `Networker:OnServerEvent()`.
-- Added `Networker:OnClientEvent()`.
-- Added `RBXScriptConnection` return types for event connections.
+```lua
+local Networker = require(Packages.Networker)
 
-### Changed
+Networker.init()
 
-- Updated documentation with event connection examples.
+local Message = Networker.newRemote("Message")
+
+Message:OnServerEvent(function(player, text)
+	print(player.Name, text)
+end)
+```
+
+### Client
+
+```lua
+local Networker = require(Packages.Networker)
+
+Networker.init()
+
+local Message = Networker.getRemote("Message")
+
+Message:FireServer("Hello Server!")
+
+Message:OnClientEvent(function(text)
+	print(text)
+end)
+```
 
 ---
 
-## [1.0.0] - 2026-07-19
+# API
 
-### Added
+## `Networker.init()`
 
-- Initial public release.
-- `Networker.init()`
-- `Networker.newRemote()`
-- `Networker.get()`
-- `Networker:FireServer()`
-- `Networker:FireClient()`
-- `Networker:FireAllClients()`
-- Strict Luau support.
-- Runtime validation with descriptive error messages.
+Initializes Networker.
+
+- Creates the `Remotes` folder on the server.
+- Waits for the `Remotes` folder on the client.
+
+---
+
+## `Networker.newRemote(name)`
+
+Creates a new `RemoteEvent`.
+
+Returns a `Networker` object.
+
+---
+
+## `Networker.getRemote(name)`
+
+Gets an existing remote.
+
+Returns a `Networker` object.
+
+---
+
+## `:FireServer(...)`
+
+Fires the remote from the client to the server.
+
+---
+
+## `:FireClient(player, ...)`
+
+Fires the remote from the server to a specific client.
+
+---
+
+## `:FireAllClients(...)`
+
+Fires the remote from the server to every connected client.
+
+---
+
+## `:OnServerEvent(callback)`
+
+Connects a callback to the server event.
+
+Returns an `RBXScriptConnection`.
+
+---
+
+## `:OnClientEvent(callback)`
+
+Connects a callback to the client event.
+
+Returns an `RBXScriptConnection`.
+
+---
+
+# Example
+
+### Server
+
+```lua
+local Networker = require(Packages.Networker)
+
+Networker.init()
+
+local Chat = Networker.newRemote("Chat")
+
+Chat:OnServerEvent(function(player, message)
+	print(player.Name, message)
+
+	Chat:FireClient(player, "Received!")
+end)
+```
+
+### Client
+
+```lua
+local Networker = require(Packages.Networker)
+
+Networker.init()
+
+local Chat = Networker.getRemote("Chat")
+
+Chat:FireServer("Hello!")
+
+Chat:OnClientEvent(function(message)
+	print(message)
+end)
+```
+
+---
+
+# License
+
+Licensed under the MIT License.
+
+---
+
+Made with ❤️ by **ThePigeonsStudio**
