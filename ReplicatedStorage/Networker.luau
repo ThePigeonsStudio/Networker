@@ -5,9 +5,9 @@ local Networker = {}
 Networker.__index = Networker
 
 export type Networker = typeof(Networker) & {
-	name : string,
-	Remote : RemoteEvent,
-	unreliableRemote : UnreliableRemoteEvent,
+	name: string,
+	Remote: RemoteEvent?,
+	UnreliableRemote: UnreliableRemoteEvent?,
 }
 
 local folder : Folder
@@ -132,11 +132,11 @@ function Networker.getUnreliableRemote(name: string): Networker
 	end
 
 	local remote = folder:FindFirstChild(name)
-	assert(remote, `Remote "{name}" does not exist.`)
+	assert(remote, `UnreliableRemoteEvent "{name}" does not exist.`)
 
 	local obj = setmetatable({
 		name = name,
-		UnreliableRemote = unreliableRemote :: UnreliableRemoteEvent,
+		UnreliableRemote = remote :: UnreliableRemoteEvent,
 	}, Networker)
 
 	return (obj :: Networker)
@@ -147,7 +147,13 @@ Connects a callback to the server event
 ]]
 function Networker:OnServerEvent(callback: (Player, ...any) -> ()): RBXScriptConnection
 	assert(RunService:IsServer(), "OnServerEvent can only be called from the server.")
-	return self.Remote.OnServerEvent:Connect(callback)
+	if self.Remote then
+		return self.Remote.OnServerEvent:Connect(callback)
+	elseif self.UnreliableRemote then
+		return self.UnreliableRemote.OnServerEvent:Connect(callback)
+	end
+
+	error("No remote exists.")
 end
 
 --[[
@@ -155,7 +161,11 @@ Connects a callback to the client event
 ]]
 function Networker:OnClientEvent(callback: (...any) -> ()): RBXScriptConnection
 	assert(RunService:IsClient(), "OnClientEvent can only be called from the client.")
-	return self.Remote.OnClientEvent:Connect(callback)
+	if self.Remote then
+		return self.Remote.OnClientEvent:Connect(callback)
+	elseif self.UnreliableRemote then
+		return self.UnreliableRemote.OnClientEvent:Connect(callback)
+	end
 end
 
 return Networker :: Networker
