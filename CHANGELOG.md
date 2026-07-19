@@ -6,12 +6,40 @@ This project follows [Semantic Versioning](https://semver.org/).
 
 ---
 
-## [1.2.0] - 2026-07-17
+## [1.3.1] - 2026-07-19
+
+### Fixed
+
+- Fixed type definitions for `UnreliableRemoteEvent`.
+- Fixed `getUnreliableRemote()` referencing an incorrect variable.
+- Fixed `OnServerEvent()` support for `UnreliableRemoteEvent`.
+- Fixed `OnClientEvent()` support for `UnreliableRemoteEvent`.
+- Improved error handling when an invalid remote is accessed.
+- General stability and reliability improvements.
+
+---
+
+## [1.3.0] - 2026-07-19
+
+### Added
+
+- Added support for `UnreliableRemoteEvent`.
+- Added `Networker.newUnreliableRemoteEvent()`.
+- Added `Networker.getUnreliableRemote()`.
+- Extended the networking API to support both `RemoteEvent` and `UnreliableRemoteEvent`.
+
+### Changed
+
+- Refactored internal networking logic to support multiple remote types.
+
+---
+
+## [1.2.0] - 2026-07-19
 
 ### Added
 
 - Added automatic client initialization using `WaitForChild()` for the `Remotes` folder.
-- Improved documentation with updated examples.
+- Improved documentation and usage examples.
 
 ### Changed
 
@@ -20,13 +48,12 @@ This project follows [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
-- Fixed a major issue where clients could attempt to access the `Remotes` folder before it existed.
+- Fixed initialization issues when clients accessed remotes before replication.
 - Fixed multiple stability issues discovered after the initial release.
-- Improved reliability when retrieving existing remotes.
 
 ---
 
-## [1.1.0] - 2026-07-17
+## [1.1.0] - 2026-07-19
 
 ### Added
 
@@ -40,11 +67,11 @@ This project follows [Semantic Versioning](https://semver.org/).
 
 ---
 
-## [1.0.0] - 2026-07-17
+## [1.0.0] - 2026-07-19
 
 ### Added
 
-- Initial release.
+- Initial public release.
 - `Networker.init()`
 - `Networker.newRemote()`
 - `Networker.get()`
@@ -52,4 +79,4 @@ This project follows [Semantic Versioning](https://semver.org/).
 - `Networker:FireClient()`
 - `Networker:FireAllClients()`
 - Strict Luau support.
-- Runtime validation.
+- Runtime validation with descriptive error messages.
