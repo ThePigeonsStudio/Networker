@@ -1,35 +1,41 @@
 # Networker
 
-[📖 Documentation](README.md) • [📝 Changelog](CHANGELOG.md) • [📄 License](LICENSE)
-
 A lightweight, type-safe networking library for Roblox built with **Strict Luau**.
 
-Networker simplifies working with `RemoteEvent`s by providing a clean, object-oriented API while remaining lightweight and easy to understand.
+<p align="center">
+  <a href="#features">Features</a> •
+  <a href="#installation">Installation</a> •
+  <a href="#quick-start">Quick Start</a> •
+  <a href="#api">API</a> •
+  <a href="./CHANGELOG.md">Changelog</a> •
+  <a href="./LICENSE">License</a>
+</p>
 
 ---
 
 ## Features
 
-* 🚀 Lightweight and easy to use
-* 🔒 Written in `--!strict`
-* 📡 Simple `RemoteEvent` wrapper
-* 📨 Fire events between the client and server
-* 🔗 Easy event connections
-* 🛡️ Runtime validation
-* 📁 Automatic remote organization
+- 🚀 Lightweight and easy to use
+- 🔒 Written in `--!strict`
+- 📡 Simple `RemoteEvent` wrapper
+- 🔄 Client and server support
+- 📨 Fire events between the client and server
+- 🔗 Built-in event connection helpers
+- 🛡️ Runtime validation with helpful error messages
+- 📦 Wally package support
 
 ---
 
 ## Installation
 
-Install with Wally:
+Install using Wally:
 
 ```toml
 [dependencies]
-Networker = "thepigeonsstudio/networker@1.1.0"
+Networker = "thepigeonsstudio/networker@1.2.0"
 ```
 
-Then run:
+Then install your dependencies:
 
 ```bash
 wally install
@@ -37,92 +43,144 @@ wally install
 
 ---
 
-## Creating a Remote
-
-**Server**
-
-```lua
-local Networker = require(Packages.Networker)
-
-Networker.init()
-
-local Message = Networker.newRemote("Message")
-```
-
----
-
-## Getting a Remote
-
-```lua
-local Networker = require(Packages.Networker)
-
-Networker.init()
-
-local Message = Networker.get("Message")
-```
-
----
-
-## Sending Events
-
-### Client → Server
-
-```lua
-Message:FireServer("Hello Server!")
-```
-
-### Server → Client
-
-```lua
-Message:FireClient(player, "Hello Client!")
-```
-
-### Server → All Clients
-
-```lua
-Message:FireAllClients("Welcome!")
-```
-
----
-
-## Listening for Events
+## Quick Start
 
 ### Server
 
 ```lua
-Message:OnServerEvent(function(player, message)
+local Networker = require(Packages.Networker)
+
+Networker.init()
+
+local Chat = Networker.newRemote("Chat")
+
+Chat:OnServerEvent(function(player, message)
 	print(player.Name, message)
+
+	Chat:FireClient(player, "Message received!")
 end)
 ```
 
 ### Client
 
 ```lua
-Message:OnClientEvent(function(message)
+local Networker = require(Packages.Networker)
+
+Networker.init()
+
+local Chat = Networker.getRemote("Chat")
+
+Chat:FireServer("Hello!")
+
+Chat:OnClientEvent(function(message)
 	print(message)
 end)
 ```
 
 ---
 
-## API
+# API
 
-| Method                      | Description                       |
-| --------------------------- | --------------------------------- |
-| `Networker.init()`          | Initializes Networker.            |
-| `Networker.newRemote(name)` | Creates a new `RemoteEvent`.      |
-| `Networker.get(name)`       | Gets an existing remote.          |
-| `:FireServer(...)`          | Fires the remote to the server.   |
-| `:FireClient(player, ...)`  | Fires the remote to one client.   |
-| `:FireAllClients(...)`      | Fires the remote to every client. |
-| `:OnServerEvent(callback)`  | Connects to `OnServerEvent`.      |
-| `:OnClientEvent(callback)`  | Connects to `OnClientEvent`.      |
+## `Networker.init()`
+
+Initializes Networker.
+
+- **Server:** Creates the `Remotes` folder inside `ReplicatedStorage`.
+- **Client:** Waits for the `Remotes` folder to replicate.
+
+---
+
+## `Networker.newRemote(name)`
+
+Creates a new `RemoteEvent`.
+
+Returns a `Networker` object.
+
+---
+
+## `Networker.getRemote(name)`
+
+Retrieves an existing remote.
+
+Returns a `Networker` object.
+
+---
+
+## `:FireServer(...)`
+
+Fires the remote from the **client** to the **server**.
+
+---
+
+## `:FireClient(player, ...)`
+
+Fires the remote from the **server** to a specific player.
+
+---
+
+## `:FireAllClients(...)`
+
+Fires the remote from the **server** to every connected player.
+
+---
+
+## `:OnServerEvent(callback)`
+
+Connects a callback to `RemoteEvent.OnServerEvent`.
+
+Returns an `RBXScriptConnection`.
+
+---
+
+## `:OnClientEvent(callback)`
+
+Connects a callback to `RemoteEvent.OnClientEvent`.
+
+Returns an `RBXScriptConnection`.
+
+---
+
+## Example
+
+### Server
+
+```lua
+local Networker = require(Packages.Networker)
+
+Networker.init()
+
+local Damage = Networker.newRemote("Damage")
+
+Damage:OnServerEvent(function(player, amount)
+	print(player.Name, "dealt", amount, "damage")
+end)
+```
+
+### Client
+
+```lua
+local Networker = require(Packages.Networker)
+
+Networker.init()
+
+local Damage = Networker.getRemote("Damage")
+
+Damage:FireServer(25)
+```
+
+---
+
+## Contributing
+
+Contributions, bug reports, feature requests, and pull requests are welcome!
+
+If you encounter an issue or have an idea for improving Networker, feel free to open an issue or submit a pull request.
 
 ---
 
 ## License
 
-Licensed under the **MIT License**.
+This project is licensed under the **MIT License**.
 
 ---
 
