@@ -107,4 +107,23 @@ function Networker:OnClientEvent(callback: (...any) -> ()): RBXScriptConnection
 	return self.Remote.OnClientEvent:Connect(callback)
 end
 
+--[[
+constructs a new UnreliableRemoteEvent
+--]]
+function Networker.newUnreliableRemoteEvent(name : string) : Networker
+	if folder == nil then
+		error("You must call Networker.init() before using Networker.newUnreliableRemoteEvent()!")
+	end
+
+	assert(not folder:FindFirstChild(name), `Remote "{name}" already exists.`)
+	assert(RunService:IsServer(), "cannot construct remotes on the client!")
+
+	local self = setmetatable({}, Networker)
+	self.UnreliableRemoteEvent = Instance.new("RemoteEvent")
+	self.UnreliableRemoteEvent.Name = name
+	self.UnreliableRemoteEvent.Parent = folder
+	self.name = name
+	return self
+end
+
 return Networker :: Networker
