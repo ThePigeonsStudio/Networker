@@ -8,6 +8,7 @@ export type Networker = typeof(Networker) & {
 	name: string,
 	Remote: RemoteEvent?,
 	UnreliableRemote: UnreliableRemoteEvent?,
+	BindableEvent: BindableEvent?,
 }
 
 local folder: Folder
@@ -38,7 +39,7 @@ function Networker.newRemote(name: string): Networker
 		error("You must call Networker.init() before using Networker.newRemote()!")
 	end
 
-	assert(not folder:FindFirstChild(name), `Remote "{name}" already exists.`)
+	assert(not folder:FindFirstChild(name), `RemoteEvent "{name}" already exists.`)
 	assert(RunService:IsServer(), "cannot construct remotes on the client!")
 
 	local self = setmetatable({}, Networker)
@@ -51,13 +52,13 @@ end
 
 --[[
 constructs a new UnreliableRemoteEvent
---]]
+]]
 function Networker.newUnreliableRemoteEvent(name: string): Networker
 	if folder == nil then
 		error("You must call Networker.init() before using Networker.newUnreliableRemoteEvent()!")
 	end
 
-	assert(not folder:FindFirstChild(name), `Remote "{name}" already exists.`)
+	assert(not folder:FindFirstChild(name), `UnreliableRemoteEvent "{name}" already exists.`)
 	assert(RunService:IsServer(), "cannot construct remotes on the client!")
 
 	local self = setmetatable({}, Networker)
@@ -68,6 +69,24 @@ function Networker.newUnreliableRemoteEvent(name: string): Networker
 	return self
 end
 
+--[[
+constructs a new bindable event
+]]
+function Networker.newBindableEvent(name: string): Networker
+	if folder == nil then
+		error("You must call Networker.init() before using Networker.newBindableEvent()!")
+	end
+
+	assert(not folder:FindFirstChild(name), `BindableEvent "{name}" already exists.`)
+	assert(RunService:IsServer(), "cannot construct bindables on the client!")
+
+	local self = setmetatable({}, Networker)
+	self.BindableEvent = Instance.new("BindableEvent")
+	self.BindableEvent.Name = name
+	self.BindableEvent.Parent = folder
+	self.name = name
+	return self
+end
 --[[
 fires the remote on the server
 ]]
@@ -102,6 +121,48 @@ function Networker:FireAllClients(...)
 	elseif self.UnreliableRemote then
 		self.UnreliableRemote:FireAllClients(...)
 	end
+end
+
+--[[
+fires a BindableEvent
+]]
+function Networker:Fire(...)
+	assert(self.BindableEvent, "No BindableEvent exists.")
+	self.BindableEvent:Fire(...)
+end
+
+--[[
+Connects a callback to the server event
+]]
+function Networker:OnServerEvent(callback: (Player, ...any) -> ()): RBXScriptConnection
+	assert(RunService:IsServer(), "OnServerEvent can only be called from the server.")
+	if self.Remote then
+		return self.Remote.OnServerEvent:Connect(callback)
+	elseif self.UnreliableRemote then
+		return self.UnreliableRemote.OnServerEvent:Connect(callback)
+	end
+
+	error("No remote exists.")
+end
+
+--[[
+Connects a callback to the client event
+]]
+function Networker:OnClientEvent(callback: (...any) -> ()): RBXScriptConnection
+	assert(RunService:IsClient(), "OnClientEvent can only be called from the client.")
+	if self.Remote then
+		return self.Remote.OnClientEvent:Connect(callback)
+	elseif self.UnreliableRemote then
+		return self.UnreliableRemote.OnClientEvent:Connect(callback)
+	end
+	error("No remote exists.")
+end
+
+function Networker:Event(): RBXScriptSignal
+	if self.BindableEvent then
+		return self.BindableEvent.Event
+	end
+	error("No bindable event exists.")
 end
 
 --[[
@@ -143,30 +204,22 @@ function Networker.getUnreliableRemote(name: string): Networker
 end
 
 --[[
-Connects a callback to the server event
+looks for a bindable event, errors if not found
 ]]
-function Networker:OnServerEvent(callback: (Player, ...any) -> ()): RBXScriptConnection
-	assert(RunService:IsServer(), "OnServerEvent can only be called from the server.")
-	if self.Remote then
-		return self.Remote.OnServerEvent:Connect(callback)
-	elseif self.UnreliableRemote then
-		return self.UnreliableRemote.OnServerEvent:Connect(callback)
+function Networker.getBindable(name: string): Networker
+	if folder == nil then
+		error("You must call Networker.init() before using Networker.getBindable()!")
 	end
 
-	error("No remote exists.")
-end
+	local bindable = folder:FindFirstChild(name)
+	assert(bindable, `BindableEvent "{name}" does not exist.`)
 
---[[
-Connects a callback to the client event
-]]
-function Networker:OnClientEvent(callback: (...any) -> ()): RBXScriptConnection
-	assert(RunService:IsClient(), "OnClientEvent can only be called from the client.")
-	if self.Remote then
-		return self.Remote.OnClientEvent:Connect(callback)
-	elseif self.UnreliableRemote then
-		return self.UnreliableRemote.OnClientEvent:Connect(callback)
-	end
-	error("No remote exists.")
+	local obj = setmetatable({
+		name = name,
+		BindableEvent = bindable :: BindableEvent,
+	}, Networker)
+
+	return obj :: Networker
 end
 
 return Networker :: Networker
