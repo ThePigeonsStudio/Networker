@@ -1,13 +1,13 @@
 # Networker
 
-A lightweight, type-safe networking library for Roblox built with **Strict Luau**.
+A lightweight, type-safe communication library for Roblox built with **Strict Luau**.
 
-Networker provides a clean, object-oriented wrapper around Roblox's `RemoteEvent` and `UnreliableRemoteEvent`, making networking simple, organized, and easy to use.
+Networker provides a clean, object-oriented wrapper around Roblox's communication primitives, including `RemoteEvent`, `UnreliableRemoteEvent`, and `BindableEvent`.
 
 <p align="center">
   <a href="#features">Features</a> •
   <a href="#installation">Installation</a> •
-  <a href="#remotes">Remotes</a> •
+  <a href="#usage">Usage</a> •
   <a href="#api">API</a> •
   <a href="./CHANGELOG.md">Changelog</a> •
   <a href="./LICENSE">License</a>
@@ -21,8 +21,9 @@ Networker provides a clean, object-oriented wrapper around Roblox's `RemoteEvent
 - 🔒 Written in `--!strict`
 - 📡 Supports `RemoteEvent`
 - ⚡ Supports `UnreliableRemoteEvent`
+- 🔔 Supports `BindableEvent`
 - 🔄 Client and server compatible
-- 📨 Fire events between the client and server
+- 📨 Simple API for sending events
 - 🔗 Built-in event connection helpers
 - 🛡️ Runtime validation with descriptive error messages
 - 📦 Wally package support
@@ -35,7 +36,7 @@ Install using Wally:
 
 ```toml
 [dependencies]
-Networker = "thepigeonsstudio/networker@1.3.1"
+Networker = "thepigeonsstudio/networker@1.4.0"
 ```
 
 Then install your dependencies:
@@ -46,52 +47,50 @@ wally install
 
 ---
 
-# Remotes
+# Usage
 
-Networker supports both **RemoteEvent** and **UnreliableRemoteEvent** with the same simple API.
+## Initialization
 
-## RemoteEvent
-
-### Creating a Remote
-
-**Server**
+Initialize Networker before creating or retrieving events.
 
 ```lua
 local Networker = require(Packages.Networker)
 
 Networker.init()
+```
 
+---
+
+# RemoteEvent
+
+## Creating
+
+```lua
 local Chat = Networker.newRemote("Chat")
 ```
 
-### Getting a Remote
-
-**Client**
+## Getting
 
 ```lua
-local Networker = require(Packages.Networker)
-
-Networker.init()
-
 local Chat = Networker.getRemote("Chat")
 ```
 
-### Sending Events
+## Sending
 
 ```lua
 -- Client → Server
-Chat:FireServer("Hello Server!")
+Chat:FireServer("Hello!")
 
 -- Server → Client
-Chat:FireClient(player, "Hello Client!")
+Chat:FireClient(player, "Hello!")
 
 -- Server → All Clients
 Chat:FireAllClients("Welcome!")
 ```
 
-### Listening for Events
+## Listening
 
-**Server**
+### Server
 
 ```lua
 Chat:OnServerEvent(function(player, message)
@@ -99,7 +98,7 @@ Chat:OnServerEvent(function(player, message)
 end)
 ```
 
-**Client**
+### Client
 
 ```lua
 Chat:OnClientEvent(function(message)
@@ -109,35 +108,31 @@ end)
 
 ---
 
-## UnreliableRemoteEvent
+# UnreliableRemoteEvent
 
-`UnreliableRemoteEvent` is designed for high-frequency data where occasional packet loss is acceptable.
+Perfect for high-frequency data where occasional packet loss is acceptable.
 
 Examples include:
 
 - Character movement
 - Camera updates
+- Projectile positions
 - Aim direction
 - Visual effects
-- Cosmetic updates
 
-### Creating an Unreliable Remote
-
-**Server**
+## Creating
 
 ```lua
 local Position = Networker.newUnreliableRemoteEvent("Position")
 ```
 
-### Getting an Unreliable Remote
-
-**Client**
+## Getting
 
 ```lua
 local Position = Networker.getUnreliableRemote("Position")
 ```
 
-### Sending Events
+## Sending
 
 ```lua
 Position:FireServer(...)
@@ -147,9 +142,7 @@ Position:FireClient(player, ...)
 Position:FireAllClients(...)
 ```
 
-### Listening for Events
-
-**Server**
+## Listening
 
 ```lua
 Position:OnServerEvent(function(player, ...)
@@ -157,11 +150,41 @@ Position:OnServerEvent(function(player, ...)
 end)
 ```
 
-**Client**
-
 ```lua
 Position:OnClientEvent(function(...)
 	print(...)
+end)
+```
+
+---
+
+# BindableEvent
+
+BindableEvents allow communication within the same environment (Server ↔ Server or Client ↔ Client).
+
+## Creating
+
+```lua
+local Damage = Networker.newBindableEvent("Damage")
+```
+
+## Getting
+
+```lua
+local Damage = Networker.getBindable("Damage")
+```
+
+## Firing
+
+```lua
+Damage:Fire(25)
+```
+
+## Listening
+
+```lua
+Damage:Event():Connect(function(amount)
+	print(amount)
 end)
 ```
 
@@ -172,29 +195,33 @@ end)
 | Function | Description |
 |----------|-------------|
 | `Networker.init()` | Initializes Networker. |
-| `Networker.newRemote(name)` | Creates a new `RemoteEvent`. |
-| `Networker.getRemote(name)` | Gets an existing `RemoteEvent`. |
-| `Networker.newUnreliableRemoteEvent(name)` | Creates a new `UnreliableRemoteEvent`. |
-| `Networker.getUnreliableRemote(name)` | Gets an existing `UnreliableRemoteEvent`. |
-| `:FireServer(...)` | Fires an event to the server. |
-| `:FireClient(player, ...)` | Fires an event to a specific client. |
-| `:FireAllClients(...)` | Fires an event to every client. |
-| `:OnServerEvent(callback)` | Connects a callback to `OnServerEvent`. |
-| `:OnClientEvent(callback)` | Connects a callback to `OnClientEvent`. |
+| `Networker.newRemote(name)` | Creates a `RemoteEvent`. |
+| `Networker.getRemote(name)` | Retrieves a `RemoteEvent`. |
+| `Networker.newUnreliableRemoteEvent(name)` | Creates an `UnreliableRemoteEvent`. |
+| `Networker.getUnreliableRemote(name)` | Retrieves an `UnreliableRemoteEvent`. |
+| `Networker.newBindableEvent(name)` | Creates a `BindableEvent`. |
+| `Networker.getBindable(name)` | Retrieves a `BindableEvent`. |
+| `:FireServer(...)` | Fires to the server. |
+| `:FireClient(player, ...)` | Fires to a specific client. |
+| `:FireAllClients(...)` | Fires to all clients. |
+| `:Fire(...)` | Fires a `BindableEvent`. |
+| `:OnServerEvent(callback)` | Connects to `OnServerEvent`. |
+| `:OnClientEvent(callback)` | Connects to `OnClientEvent`. |
+| `:Event()` | Returns the `BindableEvent.Event` signal. |
 
 ---
 
 # Contributing
 
-Contributions, bug reports, feature requests, and pull requests are welcome!
+Contributions, feature requests, bug reports, and pull requests are welcome!
 
-If you discover a bug or have an idea for improving Networker, feel free to open an issue or submit a pull request.
+If you encounter an issue or have an idea for improving Networker, feel free to open an issue.
 
 ---
 
 # License
 
-This project is licensed under the **MIT License**.
+Licensed under the **MIT License**.
 
 ---
 
