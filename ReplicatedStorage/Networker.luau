@@ -10,7 +10,7 @@ export type Networker = typeof(Networker) & {
 	UnreliableRemote: UnreliableRemoteEvent?,
 }
 
-local folder : Folder
+local folder: Folder
 local RunService = game:GetService("RunService")
 
 --[[
@@ -33,14 +33,14 @@ end
 --[[
 constructs a new remote event
 ]]
-function Networker.newRemote(name : string) : Networker
+function Networker.newRemote(name: string): Networker
 	if folder == nil then
 		error("You must call Networker.init() before using Networker.newRemote()!")
 	end
-	
+
 	assert(not folder:FindFirstChild(name), `Remote "{name}" already exists.`)
 	assert(RunService:IsServer(), "cannot construct remotes on the client!")
-	
+
 	local self = setmetatable({}, Networker)
 	self.Remote = Instance.new("RemoteEvent")
 	self.Remote.Name = name
@@ -52,7 +52,7 @@ end
 --[[
 constructs a new UnreliableRemoteEvent
 --]]
-function Networker.newUnreliableRemoteEvent(name : string) : Networker
+function Networker.newUnreliableRemoteEvent(name: string): Networker
 	if folder == nil then
 		error("You must call Networker.init() before using Networker.newUnreliableRemoteEvent()!")
 	end
@@ -75,7 +75,7 @@ function Networker:FireServer(...)
 	assert(RunService:IsClient(), "cannot fire server on the server!")
 	if self.Remote then
 		self.Remote:FireServer(...)
-		elseif self.UnreliableRemote then
+	elseif self.UnreliableRemote then
 		self.UnreliableRemote:FireServer(...)
 	end
 end
@@ -83,14 +83,14 @@ end
 --[[
 fires the remote on the client 
 ]]
-function Networker:FireClient(player : Player, ...)	
+function Networker:FireClient(player: Player, ...)
 	assert(RunService:IsServer(), "cannot fire client on the server!")
 	if self.Remote then
 		self.Remote:FireClient(player, ...)
-		elseif self.UnreliableRemote then
+	elseif self.UnreliableRemote then
 		self.UnreliableRemote:FireClient(player, ...)
 	end
-end 
+end
 
 --[[
 fires the remote on all clients
@@ -99,7 +99,7 @@ function Networker:FireAllClients(...)
 	assert(RunService:IsServer(), "cannot fire all clients on the server!")
 	if self.Remote then
 		self.Remote:FireAllClients(...)
-		elseif self.UnreliableRemote then
+	elseif self.UnreliableRemote then
 		self.UnreliableRemote:FireAllClients(...)
 	end
 end
@@ -120,7 +120,7 @@ function Networker.getRemote(name: string): Networker
 		Remote = remote :: RemoteEvent,
 	}, Networker)
 
-	return (obj :: Networker)
+	return obj :: Networker
 end
 
 --[[
@@ -139,7 +139,7 @@ function Networker.getUnreliableRemote(name: string): Networker
 		UnreliableRemote = remote :: UnreliableRemoteEvent,
 	}, Networker)
 
-	return (obj :: Networker)
+	return obj :: Networker
 end
 
 --[[
@@ -166,6 +166,7 @@ function Networker:OnClientEvent(callback: (...any) -> ()): RBXScriptConnection
 	elseif self.UnreliableRemote then
 		return self.UnreliableRemote.OnClientEvent:Connect(callback)
 	end
+	error("No remote exists.")
 end
 
 return Networker :: Networker
